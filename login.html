@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>Login</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="assets/css/login.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    </head>
+    <body>
+        <div class="container h-100">
+            <div class="row h-100 justify-content-center align-items-center">
+                <div class="col-md-6">
+                    <div class="text-center" id="login-tab">
+                    	<div class="logo">Kurir</div>
+                    	<div class="login-form-1">
+                    		<form id="login-form" class="text-left">
+                    			<div class="login-form-main-message"></div>
+                    			<div class="main-login-form">
+                    				<div class="login-group">
+                    					<div class="form-group">
+                    						<label for="lg_username" class="sr-only">Username</label>
+                    						<input type="text" class="form-control" id="lg_username" name="lg_username" placeholder="username">
+                    					</div>
+                    					<div class="form-group">
+                    						<label for="lg_password" class="sr-only">Password</label>
+                    						<input type="password" class="form-control" id="lg_password" name="lg_password" placeholder="password">
+                    					</div>
+                    				</div>
+                    				<button type="submit" class="login-button"><i class="fa fa-chevron-right"></i></button>
+                    			</div>
+                    			<div class="etc-login-form">
+                    				<a href="javascript: void(0)" id="register">create new account</a></p>
+                    			</div>
+                    		</form>
+                    	</div>
+                    </div>
+                    <div class="text-center" id="register-tab" style="display: none;">
+                    	<div class="logo">Kurir</div>
+                    	<div class="login-form-1">
+                    		<form id="register-form" class="text-left">
+                    			<div class="login-form-main-message"></div>
+                    			<div class="main-login-form">
+                    				<div class="login-group">
+                    					<div class="form-group">
+                    						<label for="reg_username" class="sr-only">Username</label>
+                    						<input type="text" class="form-control" id="reg_username" name="reg_username" placeholder="username">
+                    					</div>
+                    					<div class="form-group">
+                    						<label for="reg_password" class="sr-only">Password</label>
+                    						<input type="password" class="form-control" id="reg_password" name="reg_password" placeholder="password">
+                    					</div>
+                    					<div class="form-group">
+                    						<label for="reg_password_confirm" class="sr-only">Password Confirm</label>
+                    						<input type="password" class="form-control" id="reg_password_confirm" name="reg_password_confirm" placeholder="confirm password">
+                    					</div>
+                    					<div class="form-group">
+                    						<label for="reg_fullname" class="sr-only">Full Name</label>
+                    						<input type="text" class="form-control" id="reg_fullname" name="reg_fullname" placeholder="full name">
+                    					</div>
+                    				</div>
+                    				<button type="submit" class="login-button"><i class="fa fa-chevron-right"></i></button>
+                    			</div>
+                    			<div class="etc-login-form">
+                    				<p>already have an account? <a href="javascript: void(0)" id="login">login here</a></p>
+                    			</div>
+                    		</form>
+                    	</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.13.1/jquery.validate.min.js"></script>
+        <script src="assets/js/login.js"></script>
+        <script src="assets/js/custom-login.js"></script>
+
+    </body>
+</html>
