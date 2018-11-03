@@ -20,7 +20,10 @@
   },
   "homepage": "https://github.com/kevingio/chatting-websocket#readme",
   "dependencies": {
+    "body-parser": "^1.18.3",
+    "cookie-parser": "^1.4.3",
     "express": "^4.16.4",
+    "express-session": "^1.15.6",
     "mysql": "^2.16.0",
     "socket.io": "^2.1.1"
   }

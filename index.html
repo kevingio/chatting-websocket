@@ -1,12 +1,8 @@
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<!------ Include the above in your HEAD tag ---------->
-
-<link href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
-<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
-<!------ Include the above in your HEAD tag ---------->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
 
 
 <!DOCTYPE html>
@@ -20,8 +16,8 @@
 <script>try{Typekit.load({ async: true });}catch(e){}</script>
 <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css'>
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css" integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
-<!-- <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css'> -->
-<link rel="stylesheet" href="assets/css/index.css">
+<link rel="stylesheet" href="/assets/css/index.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
 </head>
 <body>
 
@@ -30,124 +26,198 @@
 		<div id="profile">
 			<div class="wrap">
 				<img id="profile-img" src="https://emilcarlsson.se/assets/mikeross.png" class="online" alt="" />
-				<p>Mike Ross</p>
-                <a href="login.html"><i class="fas fa-power-off expand-button text-light" aria-hidden="true"></i></a>
+				<p>{{ user.name }}</p>
+                <a href="/logout"><i class="fas fa-power-off expand-button text-light" aria-hidden="true"></i></a>
 			</div>
 		</div>
 		<div id="search">
 			<label for=""><i class="fas fa-search" aria-hidden="true"></i></label>
-			<input type="text" placeholder="Search contacts..." />
+			<input type="text" placeholder="Search persons..." />
 		</div>
-		<div id="group-chat" class="contacts">
-			<ul>
-				<li class="contact">
-					<div class="wrap">
-						<span class="contact-status online"></span>
-						<img src="https://emilcarlsson.se/assets/louislitt.png" alt="" />
-						<div class="meta">
-							<p class="name">Louis Litt</p>
-							<p class="preview">You just got LITT up, Mike.</p>
-						</div>
+		<div class="contacts">
+			<div v-if="loading">
+				<div style="margin-top: 30px;" class="text-center">
+					<i class="fas fa-spinner fa-spin"></i>
+					<br><br>
+					<small>Loading</small>
+				</div>
+			</div>
+			<div v-else>
+				<ul v-if="state === 'chat'">
+					<div v-for="(chat, index) in chats">
+						<li class="contact" v-bind:class="{ active: selected_room == index }">
+							<div class="wrap" @click="activeChat(index, chat)">
+								<span class="contact-status online"></span>
+								<img src="https://emilcarlsson.se/assets/harveyspecter.png" alt="" />
+								<div class="meta">
+									<p class="name" v-if="chat.type == 'private'">{{ chat.name }}</p>
+									<p class="name" v-else>{{ chat.room_name }}</p>
+									<p class="preview">Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
+								</div>
+							</div>
+						</li>
 					</div>
-				</li>
-				<li class="contact active">
-					<div class="wrap">
-						<span class="contact-status busy"></span>
-						<img src="https://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-						<div class="meta">
-							<p class="name">Harvey Specter</p>
-							<p class="preview">Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
-						</div>
+				</ul>
+				<ul v-else>
+					<div v-for="(user, index) in online_users">
+						<li class="contact" v-bind:class="{ active: selected_room == index }">
+							<div class="wrap" @click="activeChat(index, user)">
+								<span class="contact-status online"></span>
+								<img src="https://emilcarlsson.se/assets/harveyspecter.png" alt="" />
+								<div class="meta">
+									<p class="name">{{ user.name }}</p>
+									<p class="preview">Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
+								</div>
+							</div>
+						</li>
 					</div>
-				</li>
-			</ul>
-		</div>
-        <div id="personal-chat" class="contacts">
-			<ul>
-				<li class="contact">
-					<div class="wrap">
-						<span class="contact-status online"></span>
-						<img src="https://emilcarlsson.se/assets/louislitt.png" alt="" />
-						<div class="meta">
-							<p class="name">Louis Litt</p>
-							<p class="preview">You just got LITT up, Mike.</p>
-						</div>
-					</div>
-				</li>
-				<li class="contact active">
-					<div class="wrap">
-						<span class="contact-status busy"></span>
-						<img src="https://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-						<div class="meta">
-							<p class="name">Harvey Specter</p>
-							<p class="preview">Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
-						</div>
-					</div>
-				</li>
-			</ul>
+				</ul>
+			</div>
 		</div>
 		<div id="bottom-bar">
-			<button id="btn-group" class="btn-tab active"><i class="fas fa-users fa-fw" aria-hidden="true"></i> <span>Group (<span class="count">20</span>)</span></button>
-			<button id="btn-user-online" class="btn-tab"><i class="fas fa-smile fa-fw" aria-hidden="true"></i> <span>Online (<span class="count">10</span>)</span></button>
+			<button id="btn-group" @click="changeState('chat')" class="btn-tab active">
+				<i class="fas fa-refresh fa-fw" aria-hidden="true"></i>
+				<span>Recent Chat ({{ total_chat }})</span>
+			</button>
+			<button id="btn-user-online" @click="changeState('online')" class="btn-tab">
+				<i class="fas fa-smile fa-fw" aria-hidden="true"></i>
+				<span>Online ({{ total_user }})</span>
+			</button>
 		</div>
 	</div>
 	<div class="content">
-		<div class="contact-profile">
-			<img src="https://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-			<p>Harvey Specter</p>
-			<div class="social-media">
-                <a href="whatsapp://send?text=Yuk kita chatting di sini guys!"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
-                <a href="line://msg/text/?Yuk kita chatting di sini guys!"><i class="fab fa-line" aria-hidden="true"></i></a>
-                <a href="https://www.facebook.com/sharer/sharer.php?u=kongko.id"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+		<div v-if="!activeRoom">
+			<div class="container h-100">
+				<div class="row h-100 justify-content-md-center align-items-center">
+					<div class="col-auto text-center">
+						<h1 style="font-size: 2rem;" class="font-weight-bold animated pulse infinite">Kurir</h1>
+						<h2 style="font-size: 1.2rem;">Deliver your message in a second</h2>
+					</div>
+				</div>
 			</div>
 		</div>
-		<div class="messages">
-			<ul>
-				<li class="sent">
-					<img src="https://emilcarlsson.se/assets/mikeross.png" alt="" />
-					<p>How the hell am I supposed to get a jury to believe you when I am not even sure that I do?!</p>
-				</li>
-				<li class="replies">
-					<img src="https://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-					<p>When you're backed against the wall, break the god damn thing down.</p>
-				</li>
-				<li class="replies">
-					<img src="https://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-					<p>Excuses don't win championships.</p>
-				</li>
-				<li class="sent">
-					<img src="https://emilcarlsson.se/assets/mikeross.png" alt="" />
-					<p>Oh yeah, did Michael Jordan tell you that?</p>
-				</li>
-				<li class="replies">
-					<img src="https://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-					<p>No, I told him that.</p>
-				</li>
-				<li class="replies">
-					<img src="https://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-					<p>What are your choices when someone puts a gun to your head?</p>
-				</li>
-				<li class="sent">
-					<img src="https://emilcarlsson.se/assets/mikeross.png" alt="" />
-					<p>What are you talking about? You do what they say or they shoot you.</p>
-				</li>
-				<li class="replies">
-					<img src="https://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-					<p>Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
-				</li>
-			</ul>
-		</div>
-		<div class="message-input">
-			<div class="wrap">
-			<input type="text" placeholder="Write your message..." />
-			<i class="fa fa-paperclip attachment" aria-hidden="true"></i>
-			<button class="submit"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+		<div v-else>
+			<div class="contact-profile">
+				<img src="https://emilcarlsson.se/assets/harveyspecter.png" alt="" />
+				<p v-if="activeRoom.type == 'private'">{{ activeRoom.name }}</p>
+				<p v-else>{{ activeRoom.room_name }}</p>
+				<div class="social-media">
+	                <a href="whatsapp://send?text=Yuk kita chatting di sini guys!"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
+	                <a href="line://msg/text/?Yuk kita chatting di sini guys!"><i class="fab fa-line" aria-hidden="true"></i></a>
+	                <a href="https://www.facebook.com/sharer/sharer.php?u=kongko.id"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+				</div>
+			</div>
+			<div class="messages">
+				<ul>
+					<div v-for="chat in activeChatMessage">
+						<li v-if="chat.user_id == user.id" class="sent">
+							<img src="https://emilcarlsson.se/assets/mikeross.png" alt="" />
+							<p>{{ chat.message }}</p>
+						</li>
+						<li v-else class="replies">
+							<img src="https://emilcarlsson.se/assets/harveyspecter.png" alt="" />
+							<p>{{ chat.message }}</p>
+						</li>
+					</div>
+				</ul>
+			</div>
+			<div class="message-input">
+				<div class="wrap">
+				<input type="text" placeholder="Write your message..." />
+				<i class="fa fa-paperclip attachment" aria-hidden="true"></i>
+				<button class="submit"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+				</div>
 			</div>
 		</div>
 	</div>
 </div>
-<script src='https://production-assets.codepen.io/assets/common/stopExecutionOnTimeout-b2a7b3fe212eaa732349046d8416e00a9dec26eb7fd347590fbced3ab38af52e.js'></script><script src='https://code.jquery.com/jquery-2.2.4.min.js'></script>
-<script >
+<script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js'></script>
+<script src='https://code.jquery.com/jquery-2.2.4.min.js'></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js" charset="utf-8"></script>
+<script type="text/javascript">
+	var halo = new Vue({
+		el: '#frame',
+		data: {
+			chats: [],
+			total_chat: 0,
+			loading: true,
+			total_user: 0,
+			online_users: [],
+			selected_room: null,
+			state: 'chat',
+			activeRoom: null,
+			activeChatMessage: [],
+			user: {
+				name: 'Kurir'
+			},
+		},
+		created () {
+			this.initChats();
+		},
+		methods: {
+			initChats() {
+				let vm = this;
+				axios.get('/getLoggedInUser')
+				.then(function (response) {
+					vm.user = response.data;
+				});
+				axios.get('/getOnlineUsers')
+				.then(function (response) {
+					vm.total_user = response.data.total
+					vm.online_users = response.data.users
+				});
+				axios.get('/getRecentRoomChats')
+				.then(function (response) {
+					vm.chats = response.data.chats;
+					vm.total_chat = response.data.total;
+					sleep(1000);
+					vm.loading = false;
+				});
+			},
+			changeState(type) {
+				this.selected_room = null;
+				this.activeRoom = null;
+				this.state = type;
+				console.log(type);
+			},
+			activeChat(item, user) {
+				let vm = this;
+				vm.selected_room = item;
+				vm.activeRoom = user;
+				console.log(vm.activeRoom);
+
+				axios.get('/getChatMessage?room_id=' + vm.activeRoom.room_id)
+				.then(function (response) {
+					vm.activeChatMessage = response.data;
+				});
+			}
+			sleep(milliseconds) {
+				var start = new Date().getTime();
+				for (var i = 0; i < 1e7; i++) {
+					if ((new Date().getTime() - start) > milliseconds){
+					  	break;
+					}
+				}
+			}
+		}
+	});
+</script>
+<script>
+
+// var socket = io.connect();
+//
+// // let's assume that the client page, once rendered, knows what room it wants to join
+// var room = "abc123";
+//
+// socket.on('connect', function() {
+//    // Connected, let's sign-up for to receive messages for this room
+//    socket.emit('room', room);
+// });
+//
+// socket.on('message', function(data) {
+//    // console.log('Incoming message:', data);
+//    // console.log('janck');
+// });
 
 $('.btn-tab').on('click', function () {
     $('.btn-tab').removeClass('active');
@@ -182,6 +252,8 @@ $(window).on('keydown', function(e) {
     return false;
   }
 });
-//# sourceURL=pen.js
+
+// chatting
+
 </script>
 </body></html>
