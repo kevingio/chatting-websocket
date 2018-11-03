@@ -151,7 +151,7 @@
 				name: 'Kurir'
 			},
 		},
-		created () {
+		created() {
 			this.initChats();
 		},
 		methods: {
@@ -170,7 +170,7 @@
 				.then(function (response) {
 					vm.chats = response.data.chats;
 					vm.total_chat = response.data.total;
-					sleep(1000);
+					vm.sleep(1000);
 					vm.loading = false;
 				});
 			},
@@ -190,7 +190,7 @@
 				.then(function (response) {
 					vm.activeChatMessage = response.data;
 				});
-			}
+			},
 			sleep(milliseconds) {
 				var start = new Date().getTime();
 				for (var i = 0; i < 1e7; i++) {
