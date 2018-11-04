@@ -143,6 +143,28 @@ app.get('/getOnlineUsers', function (req, res) {
     });
 });
 
+app.post('/newPrivateChat', function(req, res){
+    var target_user = req.body.user_id;
+    var string1 = req.session.user.username + '-' + req.target_user.username;
+    var string2 = req.target_user.username + '-' + req.session.user.username;
+    var sql = "select distinct rd.room_id, r.name from rooms r, room_details rd where r.id = rd.room_id and r.name in (?,?) and r.type = 'private'";
+    connection.query(sql, [string1, string2], function (err, result) {
+        if(result.length == 1) {
+            res.send(result)
+        }else {
+            var sql = "insert into rooms (username, password, name) values (?,?,?)";
+            connection.query(sql, [username, password, name],function (err, result) {
+                if (err) throw err
+                var sql = "select distinct rd.room_id, r.name from rooms r, room_details rd where r.id = rd.room_id and r.name in (?,?) and r.type = 'private'";
+                connection.query(sql, [string1, string2], function (err, result) {
+                    if (err) throw err;
+
+                });
+            });
+        }
+    });
+});
+
 app.get('/logout', function (req, res) {
     var sql = "update users set payload = NULL where username = ?";
     var success = false;

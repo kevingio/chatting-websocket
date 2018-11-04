@@ -46,10 +46,10 @@
 				<ul v-if="state === 'chat'">
 					<div v-for="(chat, index) in chats">
 						<li class="contact" v-bind:class="{ active: selected_room == index }">
-							<div class="wrap" @click="activeChat(index, chat)">
+							<div class="wrap">
 								<span class="contact-status online"></span>
 								<img src="https://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-								<div class="meta">
+								<div class="meta" @click="activeChat(index, chat)">
 									<p class="name" v-if="chat.type == 'private'">{{ chat.name }}</p>
 									<p class="name" v-else>{{ chat.room_name }}</p>
 									<p class="preview">Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
@@ -61,10 +61,10 @@
 				<ul v-else>
 					<div v-for="(user, index) in online_users">
 						<li class="contact" v-bind:class="{ active: selected_room == index }">
-							<div class="wrap" @click="activeChat(index, user)">
+							<div class="wrap" @click="newChat(index, user)">
 								<span class="contact-status online"></span>
 								<img src="https://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-								<div class="meta">
+								<div class="meta" @click="activeChat(index, user)">
 									<p class="name">{{ user.name }}</p>
 									<p class="preview">Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
 								</div>
@@ -150,7 +150,18 @@
 			user: {
 				name: 'Kurir'
 			},
+			socket : io('localhost:3000'),
 		},
+		mounted() {
+	        // this.socket.on('MESSAGE', (data) => {
+	        //     this.activeCh.push(data);
+	        // });
+
+			// listen new chat
+			this.socket.on('NEW_CHAT', (data) => {
+	            this.chats.push(data);
+	        });
+	    },
 		created() {
 			this.initChats();
 		},
@@ -178,18 +189,14 @@
 				this.selected_room = null;
 				this.activeRoom = null;
 				this.state = type;
-				console.log(type);
 			},
 			activeChat(item, user) {
 				let vm = this;
 				vm.selected_room = item;
 				vm.activeRoom = user;
-				console.log(vm.activeRoom);
-
-				axios.get('/getChatMessage?room_id=' + vm.activeRoom.room_id)
-				.then(function (response) {
-					vm.activeChatMessage = response.data;
-				});
+			},
+			newPrivateChat(user) {
+				console.log('cek ke db');
 			},
 			sleep(milliseconds) {
 				var start = new Date().getTime();
@@ -198,6 +205,15 @@
 					  	break;
 					}
 				}
+			}
+		},
+		watch: {
+			activeRoom: function () {
+				let vm = this;
+				axios.get('/getChatMessage?room_id=' + vm.activeRoom.room_id)
+				.then(function (response) {
+					vm.activeChatMessage = response.data;
+				});
 			}
 		}
 	});
@@ -243,7 +259,7 @@ function newMessage() {
 };
 
 $('.submit').click(function() {
-  newMessage();
+  	newMessage();
 });
 
 $(window).on('keydown', function(e) {
