@@ -7,7 +7,7 @@
 	  'btn-loading': '<i class="fa fa-spinner fa-pulse"></i>',
 	  'btn-success': '<i class="fa fa-check"></i>',
 	  'btn-error': '<i class="fa fa-remove"></i>',
-	  'msg-success': 'All Good! Redirecting...',
+	  'msg-success': 'Whoops! Wrong password!',
 	  'msg-error': 'Wrong login credentials!',
 	  'useAJAX': true,
   };
