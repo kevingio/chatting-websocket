@@ -125,7 +125,7 @@ app.get('/getLoggedInUser', function (req, res) {
 });
 
 app.get('/getChatMessage', function (req, res) {
-    var sql = "select * from messages m, users u where m.user_id = u.id and room_id = ?";
+    var sql = "select * from messages m, users u where m.user_id = u.id and room_id = ? order by m.timestamp";
     connection.query(sql, req.query.room_id, function (err, results) {
         if (err) throw err;
         res.send(results);
@@ -191,8 +191,10 @@ app.get('/logout', function (req, res) {
 });
 
 app.get('/getRecentRoomChats', function (req, res) {
+    var user_id = req.session.user.id;
+    console.log('user_id: ' + user_id);
     var sql = "SELECT rooms.id as room_id, users.name, rooms.name as room_name, rooms.type, users.id, users.username FROM rooms INNER JOIN room_details ON room_details.room_id = rooms.id INNER JOIN users ON users.id = room_details.user_id WHERE room_details.user_id = ?";
-    connection.query(sql, req.session.user.id, function (err, results) {
+    connection.query(sql, user_id, function (err, results) {
         if (err) throw err;
         var data = {
             total: results.length,

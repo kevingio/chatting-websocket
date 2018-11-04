@@ -130,17 +130,17 @@
 			<div class="messages">
 				<ul>
 					<div v-for="chat in activeChatMessage">
-						<li v-if="chat.user_id == user.id" class="sent">
+						<li v-if="chat.user_id == user.id" class="replies">
 							<img src="https://emilcarlsson.se/assets/mikeross.png" alt="" />
 							<p>
-								<span class="font-weight-bold d-block">{{ user.name }}</span>
+								<span class="font-weight-bold d-block text-right">{{ user.name }}</span>
 								{{ chat.message }}
 							</p>
 						</li>
-						<li v-else class="replies">
+						<li v-else class="sent">
 							<img src="https://emilcarlsson.se/assets/harveyspecter.png" alt="" />
 							<p>
-								<span class="font-weight-bold d-block text-right">{{ chat.name }}</span>
+								<span class="font-weight-bold d-block text-left">{{ chat.name }}</span>
 								{{ chat.message }}
 							</p>
 						</li>
@@ -182,11 +182,6 @@
 			availableUsers: [],
 		},
 		mounted() {
-	        // this.socket.on('MESSAGE', (data) => {
-	        //     this.activeCh.push(data);
-	        // });
-
-			// listen new chat
 			this.socket.on('connect', () => {
                this.socket.emit('online_users');
             });
@@ -195,7 +190,9 @@
 				console.log(data.total);
 	        });
 			this.socket.on('GET_MESSAGE', (data) => {
-	            this.activeChatMessage.push(data);
+				var temp = data;
+				temp.name = this.activeRoom.name;
+	            this.activeChatMessage.push(temp);
 	        });
 			this.socket.on('INVITED', (data) => {
 				if(data.change == true) {
@@ -244,7 +241,7 @@
 							chat.name = temp;
 						}
 					});
-					vm.sleep(1000);
+					vm.sleep(2000);
 					vm.loading = false;
 				});
 			},
@@ -252,7 +249,6 @@
 				this.selected_room = null;
 				this.activeRoom = null;
 				this.state = type;
-				console.log(this.activeRoom);
 			},
 			activeChat(item, user) {
 				let vm = this;
@@ -337,9 +333,14 @@ $(".messages").animate({ scrollTop: $(document).height() }, "fast");
 
 $(document).ready(function () {
 	setTimeout(() => {
-		$('.js-example-basic-multiple').select2();
+		$('.js-example-basic-multiple').select2({
+			allowClear: true,
+			placeholder: 'You can select multiple names'
+		});
 		$('.select2-selection__rendered').css('line-height', '1.2rem');
-	}, 2000);
+		$('.select2-search__field').css('width', '100%');
+		$('.select2-search').css('width', '100%');
+	}, 3000);
 });
 
 </script>
