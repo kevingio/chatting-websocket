@@ -1,22 +1,20 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
-
 
 <!DOCTYPE html>
 <html class=''>
 <title>Kurir - Deliver your message in a second!</title>
-<head
-><script src='https://production-assets.codepen.io/assets/editor/live/console_runner-079c09a0e3b9ff743e39ee2d5637b9216b3545af0de366d4b9aad9dc87e26bfd.js'></script><script src='https://production-assets.codepen.io/assets/editor/live/events_runner-73716630c22bbc8cff4bd0f07b135f00a0bdc5d14629260c3ec49e5606f98fdd.js'></script><script src='https://production-assets.codepen.io/assets/editor/live/css_live_reload_init-2c0dc5167d60a5af3ee189d570b1835129687ea2a61bee3513dee3a50c115a77.js'></script><meta charset='UTF-8'><meta name="robots" content="noindex"><link rel="shortcut icon" type="image/x-icon" href="//production-assets.codepen.io/assets/favicon/favicon-8ea04875e70c4b0bb41da869e81236e54394d63638a1ef12fa558a4a835f1164.ico" /><link rel="mask-icon" type="" href="//production-assets.codepen.io/assets/favicon/logo-pin-f2d2b6d2c61838f7e76325261b7195c27224080bc099486ddd6dccb469b8e8e6.svg" color="#111" /><link rel="canonical" href="https://codepen.io/emilcarlsson/pen/ZOQZaV?limit=all&page=74&q=contact+" />
+<head>
+<meta charset='UTF-8'><meta name="robots" content="noindex"><link rel="shortcut icon" type="image/x-icon" href="//production-assets.codepen.io/assets/favicon/favicon-8ea04875e70c4b0bb41da869e81236e54394d63638a1ef12fa558a4a835f1164.ico" /><link rel="mask-icon" type="" href="//production-assets.codepen.io/assets/favicon/logo-pin-f2d2b6d2c61838f7e76325261b7195c27224080bc099486ddd6dccb469b8e8e6.svg" color="#111" /><link rel="canonical" href="https://codepen.io/emilcarlsson/pen/ZOQZaV?limit=all&page=74&q=contact+" />
 <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700,300' rel='stylesheet' type='text/css'>
 
-<script src="https://use.typekit.net/hoy3lrg.js"></script>
-<script>try{Typekit.load({ async: true });}catch(e){}</script>
 <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css'>
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css" integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
 <link rel="stylesheet" href="/assets/css/index.css">
+<link rel="stylesheet" href="/assets/css/select2.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
 </head>
 <body>
@@ -27,7 +25,7 @@
 			<div class="wrap">
 				<img id="profile-img" src="https://emilcarlsson.se/assets/mikeross.png" class="online" alt="" />
 				<p>{{ user.name }}</p>
-                <a href="/logout"><i class="fas fa-power-off expand-button text-light" aria-hidden="true"></i></a>
+                <a href="javascript: void(0)" @click="logout"><i class="fas fa-power-off expand-button text-light" aria-hidden="true"></i></a>
 			</div>
 		</div>
 		<div id="search">
@@ -61,10 +59,10 @@
 				<ul v-else>
 					<div v-for="(user, index) in online_users">
 						<li class="contact" v-bind:class="{ active: selected_room == index }">
-							<div class="wrap" @click="newChat(index, user)">
+							<div class="wrap">
 								<span class="contact-status online"></span>
 								<img src="https://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-								<div class="meta" @click="activeChat(index, user)">
+								<div class="meta" @click="newPrivateChat(index,user)">
 									<p class="name">{{ user.name }}</p>
 									<p class="preview">Wrong. You take the gun, or you pull out a bigger one. Or, you call their bluff. Or, you do any one of a hundred and forty six other things.</p>
 								</div>
@@ -81,7 +79,7 @@
 			</button>
 			<button id="btn-user-online" @click="changeState('online')" class="btn-tab">
 				<i class="fas fa-smile fa-fw" aria-hidden="true"></i>
-				<span>Online ({{ total_user }})</span>
+				<span>Online ({{ getOnlineUsers }})</span>
 			</button>
 		</div>
 	</div>
@@ -102,6 +100,28 @@
 				<p v-if="activeRoom.type == 'private'">{{ activeRoom.name }}</p>
 				<p v-else>{{ activeRoom.room_name }}</p>
 				<div class="social-media">
+					<button type="button" v-if="activeRoom.type != 'private'" @click="getAvailableUsers(activeRoom.room_id)" class="btn btn-success btn-sm mr-3" data-toggle="modal" data-target="#exampleModal"><i class="fas fa-plus mr-2" style="font-size: 10px;"></i>Invite someone</button>
+					<div class="modal fade" id="exampleModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+						<div class="modal-dialog" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title" id="exampleModalLabel">Invite Friend</h5>
+									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+										<span aria-hidden="true">&times;</span>
+									</button>
+								</div>
+								<div class="modal-body">
+									<select class="js-example-basic-multiple" style="width: 100%; line-height: 1.2rem;" v-model="invitedUsers" name="states[]" multiple="multiple">
+										<option v-for="user in availableUsers" :value="user.id">{{ user.name }}</option>
+									</select>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+									<button type="button" class="btn btn-success" data-dismiss="modal" @click="inviteToGroup">Save changes</button>
+								</div>
+							</div>
+						</div>
+					</div>
 	                <a href="whatsapp://send?text=Yuk kita chatting di sini guys!"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
 	                <a href="line://msg/text/?Yuk kita chatting di sini guys!"><i class="fab fa-line" aria-hidden="true"></i></a>
 	                <a href="https://www.facebook.com/sharer/sharer.php?u=kongko.id"><i class="fab fa-facebook" aria-hidden="true"></i></a>
@@ -112,28 +132,34 @@
 					<div v-for="chat in activeChatMessage">
 						<li v-if="chat.user_id == user.id" class="sent">
 							<img src="https://emilcarlsson.se/assets/mikeross.png" alt="" />
-							<p>{{ chat.message }}</p>
+							<p>
+								<span class="font-weight-bold d-block">{{ user.name }}</span>
+								{{ chat.message }}
+							</p>
 						</li>
 						<li v-else class="replies">
 							<img src="https://emilcarlsson.se/assets/harveyspecter.png" alt="" />
-							<p>{{ chat.message }}</p>
+							<p>
+								<span class="font-weight-bold d-block text-right">{{ chat.name }}</span>
+								{{ chat.message }}
+							</p>
 						</li>
 					</div>
 				</ul>
 			</div>
 			<div class="message-input">
 				<div class="wrap">
-				<input type="text" placeholder="Write your message..." />
+				<input type="text" v-model="message" @keydown.enter="sendMessage(activeRoom.room_id)" placeholder="Write your message..." />
 				<i class="fa fa-paperclip attachment" aria-hidden="true"></i>
-				<button class="submit"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+				<button class="submit" @click="sendMessage(activeRoom.room_id)"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js'></script>
-<script src='https://code.jquery.com/jquery-2.2.4.min.js'></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js" charset="utf-8"></script>
+<script src="/assets/js/select2.min.js"></script>
 <script type="text/javascript">
 	var halo = new Vue({
 		el: '#frame',
@@ -151,6 +177,9 @@
 				name: 'Kurir'
 			},
 			socket : io('localhost:3000'),
+			message: '',
+			invitedUsers: [],
+			availableUsers: [],
 		},
 		mounted() {
 	        // this.socket.on('MESSAGE', (data) => {
@@ -158,10 +187,38 @@
 	        // });
 
 			// listen new chat
-			this.socket.on('NEW_CHAT', (data) => {
-	            this.chats.push(data);
+			this.socket.on('connect', () => {
+               this.socket.emit('online_users');
+            });
+			this.socket.on('online_users', (data) => {
+	            this.total_user = data.total;
+				console.log(data.total);
+	        });
+			this.socket.on('GET_MESSAGE', (data) => {
+	            this.activeChatMessage.push(data);
+	        });
+			this.socket.on('INVITED', (data) => {
+				if(data.change == true) {
+					console.log(data);
+					axios.get('/getRecentRoomChats')
+					.then((response) => {
+						this.chats = response.data.chats;
+						this.total_chat = response.data.total;
+						this.chats.forEach((chat) => {
+							if(chat.type == 'private') {
+								var temp = chat.room_name.replace(this.user.name, '');
+								chat.name = temp;
+							}
+						});
+					});
+				}
 	        });
 	    },
+		computed: {
+			getOnlineUsers() {
+				return this.total_user;
+			}
+		},
 		created() {
 			this.initChats();
 		},
@@ -181,6 +238,12 @@
 				.then(function (response) {
 					vm.chats = response.data.chats;
 					vm.total_chat = response.data.total;
+					vm.chats.forEach(function (chat) {
+						if(chat.type == 'private') {
+							var temp = chat.room_name.replace(vm.user.name, '');
+							chat.name = temp;
+						}
+					});
 					vm.sleep(1000);
 					vm.loading = false;
 				});
@@ -189,14 +252,52 @@
 				this.selected_room = null;
 				this.activeRoom = null;
 				this.state = type;
+				console.log(this.activeRoom);
 			},
 			activeChat(item, user) {
 				let vm = this;
 				vm.selected_room = item;
 				vm.activeRoom = user;
 			},
-			newPrivateChat(user) {
-				console.log('cek ke db');
+			newPrivateChat(item, target_user) {
+				let vm = this;
+				vm.selected_room = item;
+				axios.post('/newPrivateChat', { user: target_user })
+				.then(function (response) {
+					vm.activeRoom = response.data[0];
+					vm.activeRoom.type = 'private';
+					vm.activeRoom.name = target_user.name;
+				});
+			},
+			getActiveRoom(user) {
+				let vm = this;
+
+			},
+			sendMessage(room_id) {
+				this.socket.emit('SEND_MESSAGE', {
+	                user: this.user,
+	                message: this.message,
+					room_id: room_id
+	            });
+				this.message = '';
+			},
+			getAvailableUsers(room_id) {
+				axios.get('/getAvailableUsers?room_id=' + room_id)
+				.then((response) => {
+					this.availableUsers = response.data.users;
+				});
+			},
+			inviteToGroup() {
+				console.log(this.invitedUsers);
+				this.socket.emit('INVITE_USER', {
+	                user_id: this.invitedUsers,
+					room_id: this.activeRoom.room_id
+	            });
+			},
+			logout() {
+				this.socket.emit('online_users');
+				this.sleep(1000);
+				window.location.href = "/logout";
 			},
 			sleep(milliseconds) {
 				var start = new Date().getTime();
@@ -210,30 +311,17 @@
 		watch: {
 			activeRoom: function () {
 				let vm = this;
-				axios.get('/getChatMessage?room_id=' + vm.activeRoom.room_id)
-				.then(function (response) {
-					vm.activeChatMessage = response.data;
-				});
+				if(vm.activeRoom) {
+					axios.get('/getChatMessage?room_id=' + vm.activeRoom.room_id)
+					.then(function (response) {
+						vm.activeChatMessage = response.data;
+					});
+				}
 			}
 		}
 	});
 </script>
 <script>
-
-// var socket = io.connect();
-//
-// // let's assume that the client page, once rendered, knows what room it wants to join
-// var room = "abc123";
-//
-// socket.on('connect', function() {
-//    // Connected, let's sign-up for to receive messages for this room
-//    socket.emit('room', room);
-// });
-//
-// socket.on('message', function(data) {
-//    // console.log('Incoming message:', data);
-//    // console.log('janck');
-// });
 
 $('.btn-tab').on('click', function () {
     $('.btn-tab').removeClass('active');
@@ -247,29 +335,12 @@ $('.contact').on('click', function () {
 
 $(".messages").animate({ scrollTop: $(document).height() }, "fast");
 
-function newMessage() {
-	message = $(".message-input input").val();
-	if($.trim(message) == '') {
-		return false;
-	}
-	$('<li class="sent"><img src="https://emilcarlsson.se/assets/mikeross.png" alt="" /><p>' + message + '</p></li>').appendTo($('.messages ul'));
-	$('.message-input input').val(null);
-	$('.contact.active .preview').html('<span>You: </span>' + message);
-	$(".messages").animate({ scrollTop: $(document).height() }, "fast");
-};
-
-$('.submit').click(function() {
-  	newMessage();
+$(document).ready(function () {
+	setTimeout(() => {
+		$('.js-example-basic-multiple').select2();
+		$('.select2-selection__rendered').css('line-height', '1.2rem');
+	}, 2000);
 });
-
-$(window).on('keydown', function(e) {
-  if (e.which == 13) {
-    newMessage();
-    return false;
-  }
-});
-
-// chatting
 
 </script>
 </body></html>

@@ -107,10 +107,14 @@
             $('#login-form').on('submit', function () {
                 var data = $(this).serializeArray();
                 $.post('/loginAuth', data)
-                .done(function () {
+                .done(function (data) {
                     window.location.href = '/chat';
                 });
             });
+
+            // socket.on('connect', function() {
+            //    socket.emit('online_users');
+            // });
         </script>
     </body>
 </html>
