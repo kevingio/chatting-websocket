@@ -30,7 +30,7 @@
 		</div>
 		<div id="search">
 			<label for=""><i class="fas fa-search" aria-hidden="true"></i></label>
-			<input type="text" placeholder="Search persons..." />
+			<input type="text" v-model="filterSearch" placeholder="Search persons..." />
 		</div>
 		<div class="contacts">
 			<div v-if="loading">
@@ -42,7 +42,7 @@
 			</div>
 			<div v-else>
 				<ul v-if="state === 'chat'">
-					<div v-for="(chat, index) in chats">
+					<div v-for="(chat, index) in filteredList">
 						<li class="contact" v-bind:class="{ active: selected_room == index }">
 							<div class="wrap">
 								<span class="contact-status online"></span>
@@ -180,6 +180,7 @@
 			message: '',
 			invitedUsers: [],
 			availableUsers: [],
+			filterSearch: '',
 		},
 		mounted() {
 			this.socket.on('connect', () => {
@@ -214,7 +215,16 @@
 		computed: {
 			getOnlineUsers() {
 				return this.total_user;
-			}
+			},
+			filteredList() {
+		      	return this.chats.filter(chat => {
+					if(chat.type == 'private') {
+						return chat.name.toLowerCase().includes(this.filterSearch.toLowerCase())
+					} else {
+						return chat.room_name.toLowerCase().includes(this.filterSearch.toLowerCase())
+					}
+		      	})
+		    }
 		},
 		created() {
 			this.initChats();
@@ -314,6 +324,12 @@
 					});
 				}
 			}
+			// filterSearch: function () {
+			// 	let vm = this;
+			// 	if(filterSearch != '') {
+			//
+			// 	}
+			// }
 		}
 	});
 </script>
