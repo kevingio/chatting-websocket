@@ -57,7 +57,7 @@
 					</div>
 				</ul>
 				<ul v-else>
-					<div v-for="(user, index) in online_users">
+					<div v-for="(user, index) in filteredOnlineUsers">
 						<li class="contact" v-bind:class="{ active: selected_room == index }">
 							<div class="wrap">
 								<span class="contact-status online"></span>
@@ -192,7 +192,11 @@
 	        });
 			this.socket.on('GET_MESSAGE', (data) => {
 				var temp = data;
-				temp.name = this.activeRoom.name;
+				this.online_users.forEach((user) => {
+					if(user.id == temp.user_id) {
+						temp.name = user.name;
+					}
+				});
 	            this.activeChatMessage.push(temp);
 	        });
 			this.socket.on('INVITED', (data) => {
@@ -224,7 +228,12 @@
 						return chat.room_name.toLowerCase().includes(this.filterSearch.toLowerCase())
 					}
 		      	})
-		    }
+		    },
+			filteredOnlineUsers() {
+				return this.online_users.filter(chat => {
+					return chat.name.toLowerCase().includes(this.filterSearch.toLowerCase())
+		      	})
+			}
 		},
 		created() {
 			this.initChats();
