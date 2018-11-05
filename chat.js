@@ -92,8 +92,6 @@ app.post('/regisAuth', function(req, res){
     console.log('user registered');
 });
 
-var logged_in = null;
-
 app.post('/loginAuth', function (req, res) {
     var sql = "select name, username, id from users where username = ? and password = ?";
     var username = req.body.lg_username;
@@ -110,8 +108,6 @@ app.post('/loginAuth', function (req, res) {
                 if (err) throw err;
                 if (result.affectedRows == 1) {
                     res.send({ user_id: req.session.user.id});
-                    logged_in = req.session.user.id;
-                    // return res.redirect('/chat');
                 }
             });
             console.log(username + ' logged in!');
@@ -178,14 +174,12 @@ app.post('/newPrivateChat', function(req, res){
 
 app.get('/logout', function (req, res) {
     var sql = "update users set payload = NULL where username = ?";
-    var success = false;
     connection.query(sql, req.session.user.username, function (err, result) {
         if (err) throw err;
         if (result.affectedRows == 1) {
             console.log(req.session.user.username + ' logout!');
             req.session.destroy();
-            success = true;
-            return res.redirect('/');
+            res.send({ success: true });
         }
     });
 });
@@ -225,10 +219,9 @@ const self = this;
 
 io.on('connect', (socket) => {
     console.log('connected!');
-
     socket.on('online_users', () => {
-        var sql = "select name, username, id from users where payload is not null and id != ?";
-        connection.query(sql, logged_in, function (err, results) {
+        var sql = "select name, username, id from users where payload is not null";
+        connection.query(sql, function (err, results) {
             if (err) throw err;
             if (results.length > 0) {
                 var userOnline = {

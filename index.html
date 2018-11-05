@@ -32,6 +32,9 @@
 			<label for=""><i class="fas fa-search" aria-hidden="true"></i></label>
 			<input type="text" v-model="filterSearch" placeholder="Search persons..." />
 		</div>
+		<div class="d-block">
+			<button type="button" class="btn btn-danger btn-sm btn-block" name="button">New Group Chat</button>
+		</div>
 		<div class="contacts">
 			<div v-if="loading">
 				<div style="margin-top: 30px;" class="text-center">
@@ -188,7 +191,6 @@
             });
 			this.socket.on('online_users', (data) => {
 	            this.total_user = data.total;
-				console.log(data.total);
 	        });
 			this.socket.on('GET_MESSAGE', (data) => {
 				var temp = data;
@@ -218,21 +220,25 @@
 	    },
 		computed: {
 			getOnlineUsers() {
-				return this.total_user;
+				return this.total_user - 1;
 			},
 			filteredList() {
-		      	return this.chats.filter(chat => {
-					if(chat.type == 'private') {
-						return chat.name.toLowerCase().includes(this.filterSearch.toLowerCase())
-					} else {
-						return chat.room_name.toLowerCase().includes(this.filterSearch.toLowerCase())
-					}
-		      	})
+		      	if(this.chats) {
+					return this.chats.filter(chat => {
+						if(chat.type == 'private') {
+							return chat.name.toLowerCase().includes(this.filterSearch.toLowerCase())
+						} else {
+							return chat.room_name.toLowerCase().includes(this.filterSearch.toLowerCase())
+						}
+			      	})
+				}
 		    },
 			filteredOnlineUsers() {
-				return this.online_users.filter(chat => {
-					return chat.name.toLowerCase().includes(this.filterSearch.toLowerCase())
-		      	})
+				if(this.online_users) {
+					return this.online_users.filter(chat => {
+						return chat.name.toLowerCase().includes(this.filterSearch.toLowerCase())
+			      	})
+				}
 			}
 		},
 		created() {
@@ -247,8 +253,7 @@
 				});
 				axios.get('/getOnlineUsers')
 				.then(function (response) {
-					vm.total_user = response.data.total
-					vm.online_users = response.data.users
+					vm.online_users = response.data.users;
 				});
 				axios.get('/getRecentRoomChats')
 				.then(function (response) {
@@ -310,9 +315,13 @@
 	            });
 			},
 			logout() {
-				this.socket.emit('online_users');
-				this.sleep(1000);
-				window.location.href = "/logout";
+				axios.get('/logout')
+				.then((response) => {
+					if(response.data.success == true) {
+						this.socket.emit('online_users');
+						window.location.href = "/";
+					}
+				});
 			},
 			sleep(milliseconds) {
 				var start = new Date().getTime();
@@ -333,12 +342,6 @@
 					});
 				}
 			}
-			// filterSearch: function () {
-			// 	let vm = this;
-			// 	if(filterSearch != '') {
-			//
-			// 	}
-			// }
 		}
 	});
 </script>
