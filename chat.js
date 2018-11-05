@@ -172,6 +172,33 @@ app.post('/newPrivateChat', function(req, res){
     });
 });
 
+app.post('/newGroupChat', function(req, res){
+    var room_name = req.body.name;
+    var users = req.body.users;
+    var sql = "insert into rooms (name, type) values (?,'group')";
+    connection.query(sql, room_name,function (err, result) {
+        if (err) throw err
+        res.send({ room_id: result.insertId });
+        // var temp_id = [];
+        // var index = 1;
+        // var count = users.length;
+        // var sql = "insert into room_details (room_id, user_id) values";
+        // users.forEach((user) => {
+        //     if(index == count) {
+        //         sql += '(?,?)';
+        //     } else {
+        //         sql += '(?,?),';
+        //     }
+        //     temp_id.push(result.insertId);
+        //     temp_id.push(user);
+        //     index++;
+        // });
+        // connection.query(sql, temp_id,function (err, result) {
+        //     if (err) throw err
+        // });
+    });
+});
+
 app.get('/logout', function (req, res) {
     var sql = "update users set payload = NULL where username = ?";
     connection.query(sql, req.session.user.username, function (err, result) {
@@ -274,6 +301,7 @@ io.on('connect', (socket) => {
             if (err) throw err
         });
 
+        socket.join(data.room_id);
         io.sockets.emit('INVITED', {change: true});
     })
 });
