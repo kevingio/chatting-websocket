@@ -122,6 +122,26 @@
 							</div>
 						</div>
 					</div>
+					<button type="button" class="btn btn-danger btn-sm mr-3" data-toggle="modal" data-target="#exitModal"><i class="fa fa-sign-out mr-2" style="font-size: 10px;"></i>Leave chat</button>
+					<div class="modal fade" id="exitModal" role="dialog" aria-labelledby="exitModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Leave chat</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Are you sure you want to leave?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-danger" @click="leaveRoom" data-dismiss="modal">Yes, leave</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Go back</button>
+                                </div>
+                            </div>
+                        </div>
+					</div>
 	                <a href="whatsapp://send?text=Yuk kita chatting di sini guys!"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
 	                <a href="line://msg/text/?Yuk kita chatting di sini guys!"><i class="fab fa-line" aria-hidden="true"></i></a>
 	                <a href="https://www.facebook.com/sharer/sharer.php?u=kongko.id"><i class="fab fa-facebook" aria-hidden="true"></i></a>
@@ -210,6 +230,23 @@
 					});
 				}
 	        });
+			this.socket.on('LEFT_ROOM', (data) => {
+                this.activeRoom = null;
+                if(data.change == true) {
+					console.log(data);
+					axios.get('/getRecentRoomChats')
+					.then((response) => {
+						this.chats = response.data.chats;
+						this.total_chat = response.data.total;
+						this.chats.forEach((chat) => {
+							if(chat.type == 'private') {
+								var temp = chat.room_name.replace(this.user.name, '');
+								chat.name = temp;
+							}
+						});
+					});
+				}
+	        });
 	    },
 		computed: {
 			getOnlineUsers() {
@@ -282,14 +319,19 @@
 				.then((response) => {
 					this.availableUsers = response.data.users;
 				});
-			},
+            },
 			inviteToGroup() {
-				console.log(this.invitedUsers);
-				this.socket.emit('INVITE_USER', {
+                this.socket.emit('INVITE_USER', {
 	                user_id: this.invitedUsers,
 					room_id: this.activeRoom.room_id
 	            });
-			},
+            },
+            leaveRoom() {
+                this.socket.emit('LEAVE_ROOM', {
+	                user_id: this.user.id,
+					room_id: this.activeRoom.room_id
+	            });
+            },
 			logout() {
 				this.socket.emit('online_users');
 				this.sleep(1000);

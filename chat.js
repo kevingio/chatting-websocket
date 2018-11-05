@@ -282,7 +282,22 @@ io.on('connect', (socket) => {
         });
 
         io.sockets.emit('INVITED', {change: true});
-    })
+    });
+
+    socket.on('LEAVE_ROOM', (data) => {
+        room_id = data.room_id
+        user_id = data.user_id
+        console.log(room_id)
+        console.log(user_id)
+        var sql = "DELETE FROM room_details WHERE room_id = ? AND user_id = ?";
+        connection.query(sql, [room_id, user_id], function (err, result) {
+            if (err) throw err
+        });
+
+        io.sockets.emit('LEFT_ROOM', {change: true});
+    });
+
+
 });
 
 function getOnlineUsers(user_id) {
