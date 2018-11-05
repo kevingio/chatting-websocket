@@ -30,7 +30,32 @@
 		</div>
 		<div id="search">
 			<label for=""><i class="fas fa-search" aria-hidden="true"></i></label>
-			<input type="text" placeholder="Search persons..." />
+			<input type="text" v-model="filterSearch" placeholder="Search persons..." />
+		</div>
+		<div class="d-block">
+			<button type="button" class="btn btn-danger btn-sm btn-block" name="button" data-toggle="modal" data-target="#newGroupModal">New Group Chat</button>
+			<div class="modal fade" id="newGroupModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title text-dark" id="exampleModalLabel">Create Group Chat</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<input type="text" class="form-control mb-3" v-model="newGroupChat.name" placeholder="Group Name">
+							<select class="js-example-basic-multiple" style="width: 100%; line-height: 1.2rem;" v-model="newGroupChat.users" name="states[]" multiple="multiple">
+								<option v-for="user in availableUsers" :value="user.id">{{ user.name }}</option>
+							</select>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+							<button type="button" class="btn btn-success" data-dismiss="modal" @click="createGroupChat">Save changes</button>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 		<div class="contacts">
 			<div v-if="loading">
@@ -42,7 +67,7 @@
 			</div>
 			<div v-else>
 				<ul v-if="state === 'chat'">
-					<div v-for="(chat, index) in chats">
+					<div v-for="(chat, index) in filteredList">
 						<li class="contact" v-bind:class="{ active: selected_room == index }">
 							<div class="wrap">
 								<span class="contact-status online"></span>
@@ -57,7 +82,7 @@
 					</div>
 				</ul>
 				<ul v-else>
-					<div v-for="(user, index) in online_users">
+					<div v-for="(user, index) in filteredOnlineUsers">
 						<li class="contact" v-bind:class="{ active: selected_room == index }">
 							<div class="wrap">
 								<span class="contact-status online"></span>
@@ -200,6 +225,11 @@
 			message: '',
 			invitedUsers: [],
 			availableUsers: [],
+			filterSearch: '',
+			newGroupChat: {
+				name: '',
+				users: []
+			},
 		},
 		mounted() {
 			this.socket.on('connect', () => {
@@ -207,11 +237,14 @@
             });
 			this.socket.on('online_users', (data) => {
 	            this.total_user = data.total;
-				console.log(data.total);
 	        });
 			this.socket.on('GET_MESSAGE', (data) => {
 				var temp = data;
-				temp.name = this.activeRoom.name;
+				this.online_users.forEach((user) => {
+					if(user.id == temp.user_id) {
+						temp.name = user.name;
+					}
+				});
 	            this.activeChatMessage.push(temp);
 	        });
 			this.socket.on('INVITED', (data) => {
@@ -250,7 +283,25 @@
 	    },
 		computed: {
 			getOnlineUsers() {
-				return this.total_user;
+				return this.total_user - 1;
+			},
+			filteredList() {
+		      	if(this.chats) {
+					return this.chats.filter(chat => {
+						if(chat.type == 'private') {
+							return chat.name.toLowerCase().includes(this.filterSearch.toLowerCase())
+						} else {
+							return chat.room_name.toLowerCase().includes(this.filterSearch.toLowerCase())
+						}
+			      	})
+				}
+		    },
+			filteredOnlineUsers() {
+				if(this.online_users) {
+					return this.online_users.filter(chat => {
+						return chat.name.toLowerCase().includes(this.filterSearch.toLowerCase())
+			      	})
+				}
 			}
 		},
 		created() {
@@ -265,8 +316,7 @@
 				});
 				axios.get('/getOnlineUsers')
 				.then(function (response) {
-					vm.total_user = response.data.total
-					vm.online_users = response.data.users
+					vm.online_users = response.data.users;
 				});
 				axios.get('/getRecentRoomChats')
 				.then(function (response) {
@@ -325,7 +375,18 @@
 	                user_id: this.invitedUsers,
 					room_id: this.activeRoom.room_id
 	            });
-            },
+			},
+			createGroupChat() {
+				this.newGroupChat.users.push(this.user.id);
+				console.log(this.newGroupChat);
+				axios.post('/newGroupChat', this.newGroupChat)
+				.then((response) => {
+					this.socket.emit('INVITE_USER', {
+		                user_id: this.newGroupChat.users,
+						room_id: response.data.room_id
+		            });
+				});
+			},
             leaveRoom() {
                 this.socket.emit('LEAVE_ROOM', {
 	                user_id: this.user.id,
@@ -333,9 +394,13 @@
 	            });
             },
 			logout() {
-				this.socket.emit('online_users');
-				this.sleep(1000);
-				window.location.href = "/logout";
+				axios.get('/logout')
+				.then((response) => {
+					if(response.data.success == true) {
+						this.socket.emit('online_users');
+						window.location.href = "/";
+					}
+				});
 			},
 			sleep(milliseconds) {
 				var start = new Date().getTime();
