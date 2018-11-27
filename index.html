@@ -236,7 +236,14 @@
                this.socket.emit('online_users');
             });
 			this.socket.on('online_users', (data) => {
-	            this.total_user = data.total;
+                console.log(data);
+                this.total_user = data.total;
+                this.online_users= []
+                data.users.forEach((item) => {
+                    if(item.name !== this.user.name) {
+                        this.online_users.push(item)
+                    }
+                })
 	        });
 			this.socket.on('GET_MESSAGE', (data) => {
 				var temp = data;
@@ -397,7 +404,7 @@
 				axios.get('/logout')
 				.then((response) => {
 					if(response.data.success == true) {
-						this.socket.emit('online_users');
+                        this.socket.emit('online_users');
 						window.location.href = "/";
 					}
 				});
