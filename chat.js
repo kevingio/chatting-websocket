@@ -28,6 +28,12 @@ app.use(session({
     saveUninitialized: false
 }));
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 app.get('/chat', function(req, res) {
     if(!req.session.auth) {
         return res.redirect('/')
@@ -63,7 +69,7 @@ app.get('/assets/js/select2.min.js', function(req, res) {
 });
 
 // routing
-app.post('/regisAuth', function(req, res){
+app.post('/regisAuth', function(req, res, next){
     var username = req.body.reg_username;
     var password = req.body.reg_password;
     var name = req.body.reg_fullname;
@@ -92,7 +98,7 @@ app.post('/regisAuth', function(req, res){
     console.log('user registered');
 });
 
-app.post('/loginAuth', function (req, res) {
+app.post('/loginAuth', function (req, res, next) {
     var sql = "select name, username, id from users where username = ? and password = ?";
     var username = req.body.lg_username;
     var password = req.body.lg_password;
