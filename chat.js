@@ -82,13 +82,15 @@ app.post('/regisAuth', function(req, res, next){
             if (result.length == 1) {
                 req.session.auth = true;
                 req.session.user = result[0];
+                var user = result[0];
 
                 var sql = "update users set payload = ? where username = ?";
                 var success = false;
                 connection.query(sql, [req.sessionID,req.session.user.username], function (err, result) {
                     if (err) throw err;
                     if (result.affectedRows == 1) {
-                        return res.redirect('/chat');
+                        // return res.redirect('/messages');
+                        res.send({ user: user });
                     }
                 });
                 console.log(username + ' logged in!');
@@ -107,13 +109,14 @@ app.post('/loginAuth', function (req, res, next) {
         if (result.length == 1) {
             req.session.auth = true;
             req.session.user = result[0];
+            var user = result[0];
 
             var sql = "update users set payload = ? where username = ?";
             var success = false;
             connection.query(sql, [req.sessionID,req.session.user.username], function (err, result) {
                 if (err) throw err;
                 if (result.affectedRows == 1) {
-                    res.send({ user_id: req.session.user.id});
+                    res.send({ user: user });
                 }
             });
             console.log(username + ' logged in!');
@@ -135,7 +138,7 @@ app.get('/getChatMessage', function (req, res) {
 });
 app.get('/getOnlineUsers', function (req, res) {
     var sql = "select name, username, id from users where payload is not null and id != ?";
-    connection.query(sql, req.session.user.id, function (err, results) {
+    connection.query(sql, req.query.user_id, function (err, results) {
         if (err) throw err;
         if (results.length > 0) {
             var userOnline = {
@@ -206,6 +209,7 @@ app.post('/newGroupChat', function(req, res){
 });
 
 app.get('/logout', function (req, res) {
+    console.log(req.session);
     var sql = "update users set payload = NULL where username = ?";
     connection.query(sql, req.session.user.username, function (err, result) {
         if (err) throw err;
@@ -218,8 +222,7 @@ app.get('/logout', function (req, res) {
 });
 
 app.get('/getRecentRoomChats', function (req, res) {
-    var user_id = req.session.user.id;
-    console.log('user_id: ' + user_id);
+    var user_id = req.query.user_id;
     var sql = "SELECT rooms.id as room_id, users.name, rooms.name as room_name, rooms.type, users.id, users.username FROM rooms INNER JOIN room_details ON room_details.room_id = rooms.id INNER JOIN users ON users.id = room_details.user_id WHERE room_details.user_id = ?";
     connection.query(sql, user_id, function (err, results) {
         if (err) throw err;
