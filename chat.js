@@ -3,7 +3,7 @@ var express = require('express')
 var connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'root',
-  password : 'kevin',
+  password : '',
   database : 'pwl'
 });
 
@@ -129,6 +129,15 @@ app.get('/getLoggedInUser', function (req, res) {
     res.send(user);
 });
 
+app.get('/getRoomDetail', function (req, res) {
+    var room_id = req.query.id;
+    var sql = "SELECT rooms.id as room_id, users.name, rooms.name as room_name, rooms.type, users.id, users.username FROM rooms INNER JOIN room_details ON room_details.room_id = rooms.id INNER JOIN users ON users.id = room_details.user_id WHERE rooms.id = ? AND users.id != ?";
+    connection.query(sql, [room_id, req.query.user_id], function (err, results) {
+        if (err) throw err;
+        res.send(results[0]);
+    });
+});
+
 app.get('/getChatMessage', function (req, res) {
     var sql = "select * from messages m, users u where m.user_id = u.id and room_id = ? order by m.timestamp";
     connection.query(sql, req.query.room_id, function (err, results) {
@@ -156,24 +165,25 @@ app.get('/getOnlineUsers', function (req, res) {
 });
 
 app.post('/newPrivateChat', function(req, res){
-    var target_user = req.body.user;
-    var string1 = req.session.user.name + target_user.name;
-    var string2 = target_user.name + req.session.user.name;
+    var target_user = req.body.target;
+    var user = req.body.user;
+    var string1 = user.name + target_user.name;
+    var string2 = target_user.name + user.name;
     var sql = "select distinct rd.room_id, r.name from rooms r, room_details rd where r.id = rd.room_id and r.name in (?,?) and r.type = 'private'";
     connection.query(sql, [string1, string2], function (err, result) {
         if(result.length == 1) {
-            res.send(result)
+            res.send(result[0])
         }else {
             var sql = "insert into rooms (name, type) values (?,'private')";
             connection.query(sql, string1,function (err, result) {
                 if (err) throw err
                 var sql = "insert into room_details (room_id, user_id) values (?,?), (?,?)";
-                connection.query(sql, [result.insertId, req.session.user.id, result.insertId, target_user.id],function (err, result) {
+                connection.query(sql, [result.insertId, user.id, result.insertId, target_user.id],function (err, result) {
                     if (err) throw err
                     var sql = "select distinct rd.room_id, r.name from rooms r, room_details rd where r.id = rd.room_id and r.name in (?,?) and r.type = 'private'";
                     connection.query(sql, [string1, string2], function (err, result) {
                         if (err) throw err;
-                        res.send(result);
+                        res.send(result[0]);
                     });
                 });
             });
